@@ -24,6 +24,7 @@ class Azimutal{
   public:
     // construtores (depende do motor de passo):
     Azimutal(int confPassos, int pinPasso1, int pinPasso2,
+			 int velGiro,
 			 int pinRX1,     int pinRX2,    int pinRX3,
 		     int pinRX4);
 	Azimutal(int confPassos, int pinPasso1, int pinPasso2,
