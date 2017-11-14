@@ -37,7 +37,7 @@ class Azimutal{
 			 int pinRX4);
     
 
-    // speed setter method:
+    // Para fazer o Stepper funcionar
     void setSpeed(long whatSpeed);
 
     // mover method:
