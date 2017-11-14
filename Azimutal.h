@@ -1,25 +1,25 @@
 /*
- * Azimutal.h - Biblioteca de um azimutal  - Versão 1.1
+ * Azimutal.h - Biblioteca de um azimutal  - Versï¿½o 1.1
  *
  * Funcionamento original	(0.0)   por Filipe Gabriel Santos e Henrique Martinez Rocamora.
  * Biblioteca para arduino	(0.1)	por Filipe Santos, David Engelstein, Gustavo Takashi, Paulo Yamabuchi
  *
- * Esta biblioteca é para o uso privado da instituição hoje (2017) nomeada por PoliNáutico - grupo de
- * extensão acadêmica da Escola Politecninca da Universidade de São Paulo. Seu uso não está autorizado 
- * para qualquer outra pessoa que não seja, ou não tenha sido, associada ao grupo.
+ * Esta biblioteca ï¿½ para o uso privado da instituiï¿½ï¿½o hoje (2017) nomeada por PoliNï¿½utico - grupo de
+ * extensï¿½o acadï¿½mica da Escola Politecninca da Universidade de Sï¿½o Paulo. Seu uso nï¿½o estï¿½ autorizado 
+ * para qualquer outra pessoa que nï¿½o seja, ou nï¿½o tenha sido, associada ao grupo.
  *
- * Universidade de São Paulo, São Paulo, São Paulo, Brasil. Novembro de 2017
+ * Universidade de Sï¿½o Paulo, Sï¿½o Paulo, Sï¿½o Paulo, Brasil. Novembro de 2017
  * 
- * Esta biblioteca controla um motor de passo ligado a uma propulsão azimutal do barco João Cãndido II.
- * Sua comunicação com o receptor usa 3 canais e um sensor de fim de curso, o qual verifica se o barco está
+ * Esta biblioteca controla um motor de passo ligado a uma propulsï¿½o azimutal do barco Joï¿½o Cï¿½ndido II.
+ * Sua comunicaï¿½ï¿½o com o receptor usa 3 canais e um sensor de fim de curso, o qual verifica se o barco estï¿½
  * em zero com a normal.
  */
 
-// Garante que o arquivo só seja incluído uma vez.
+// Garante que o arquivo sï¿½ seja incluï¿½do uma vez.
 #ifndef Azimutal_h
 #define Azimutal_h
 
-// Descrição interativa da classe
+// Descriï¿½ï¿½o interativa da classe
 class Azimutal{
   public:
     // construtores (depende do motor de passo):
@@ -47,7 +47,8 @@ class Azimutal{
     int version(void);
 
   private:
-	  Stepper mtrPasso;
+    Stepper mtrPasso;
+};
 
 #endif
 
