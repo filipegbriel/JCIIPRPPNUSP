@@ -49,5 +49,7 @@ class Azimutal{
   private:
 	  Stepper mtrPasso;
 
+	  pepeta
+
 #endif
 
