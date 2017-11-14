@@ -28,12 +28,12 @@ class Azimutal{
 			 int pinRX1,     int pinRX2,    int pinRX3,
 		     int pinRX4);
 	Azimutal(int confPassos, int pinPasso1, int pinPasso2,
-			 int pinPasso3,	 int pinPasso4,
+			 int pinPasso3,	 int pinPasso4, int velGiro,
 			 int pinRX1,     int pinRX2,    int pinRX3,
 			 int pinRX4);
 	Azimutal(int confPassos, int pinPasso1, int pinPasso2,
 			 int pinPasso3,  int pinPasso4, int pinPasso5,
-			 int pinPasso6,
+			 int pinPasso6,  int velGiro,
 			 int pinRX1,	 int pinRX2,	int pinRX3,
 			 int pinRX4);
     
