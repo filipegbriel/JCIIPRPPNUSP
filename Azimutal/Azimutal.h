@@ -21,15 +21,27 @@
 class Azimutal : public Stepper
 {
 public:
+	//construtures para todos os casos de motor de passo
 	Azimutal(int pinRX[0], int pinRX[1], int pinRX[2], int pinRX[3],
 		int pinSM0, int pinSM1, int nbrSteps);
 	Azimutal(int pinRX[0], int pinRX[1], int pinRX[2], int pinRX[3],
 				int pinSM0, int pinSM1, int pinSM2, int pinSM3, int nbrSteps);
 	Azimutal(int pinRX[0], int pinRX[1], int pinRX[2], int pinRX[3],
 				int pinSM0, int pinSM1, int pinSM2, int pinSM3, int pinSM4, int nbrSteps);
-	~Azimutal();
+	
+	//Constantes de calibração
+	bool setConstStep(float minStep, float maxStep);
+	bool setConstPWM(float minPWM, float maxPWM);
 
 private:
 	int pinRX[4]; //pinos do Receptor
+
+	//constantes de calibração
+	float minPWM, maxPWM;				//min e max leitura analogica do pwm.
+	float minStep, maxStep;				//min e max abertura do Azimutal.
+
+	//metodos privados
+	float map_f(float number, float minI, float maxI, float minF, float maxF);
+	float readPWM(int pin);
 };
 #endif

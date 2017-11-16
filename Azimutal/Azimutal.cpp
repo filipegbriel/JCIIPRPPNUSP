@@ -42,6 +42,36 @@ Azimutal::Azimutal(int pinRX[0], int pinRX[1], int pinRX[2], int pinRX[3], int p
 	}
 }
 
-Azimutal::~Azimutal()
+//Configurando as constantes de calibração:
+bool Azimutal::setConstStep(float minStep, float maxStep)
 {
+	this->minStep = minStep;
+	this->maxStep = maxStep;
+
+	return true;
+}
+bool Azimutal::setConstPWM(float minPWM, float maxPWM)
+{
+	this->minPWM = minPWM;
+	this->maxPWM = maxPWM;
+
+	return true;
+}
+
+//Métodos 
+float Azimutal::readPWM(int pin)
+{
+	unsigned long x_long = pulseIn(pin, HIGH);
+	int x = (int)x_long;
+
+	while (x > this->maxPWM || x < this->minPWM)  x = (int)pulseIn(pin, HIGH);
+
+	return map_f((float)x, minPWM, maxPWM, minStep, maxStep);
+}
+float Azimutal::map_f(float number, float minI, float maxI, float minF, float maxF)
+{
+	float p = ((number - minI) * (maxF - minF) / (maxI - minI)) + minF;
+	if (p > maxF) p = maxF;
+	if (p < minF) p = minF;
+	return p;
 }
