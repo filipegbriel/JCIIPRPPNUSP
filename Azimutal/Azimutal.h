@@ -18,14 +18,18 @@
 #ifndef Azimutal_h
 #define Azimutal_h
 #include "Stepper.h"
-class Azimutal :
-	public Stepper
+class Azimutal : public Stepper
 {
 public:
-	Azimutal(int pinRX[0], int pinRX[1], int pinRX[2], int pinRX[3]);
+	Azimutal(int pinRX[0], int pinRX[1], int pinRX[2], int pinRX[3],
+		int pinSM0, int pinSM1, int nbrSteps);
+	Azimutal(int pinRX[0], int pinRX[1], int pinRX[2], int pinRX[3],
+				int pinSM0, int pinSM1, int pinSM2, int pinSM3, int nbrSteps);
+	Azimutal(int pinRX[0], int pinRX[1], int pinRX[2], int pinRX[3],
+				int pinSM0, int pinSM1, int pinSM2, int pinSM3, int pinSM4, int nbrSteps);
 	~Azimutal();
 
 private:
-	int pinRX[4];
+	int pinRX[4]; //pinos do Receptor
 };
 #endif

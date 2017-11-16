@@ -98,7 +98,7 @@ class Stepper {
 
     int version(void);
 
-  private:
+protected:
     void stepMotor(int this_step);
 
     int direction;            // Direction of rotation

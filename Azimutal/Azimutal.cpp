@@ -17,10 +17,30 @@
  */
 
 
-Azimutal::Azimutal(int pinRX[0], int pinRX[1], int pinRX[2], int pinRX[3])
+Azimutal::Azimutal(int pinRX[0], int pinRX[1], int pinRX[2], int pinRX[3], int pinSM0, int pinSM1, int nbrSteps) : Stepper(nbrSteps, pinSM0, pinSM1)
 {
+	for (int i = 0, i < 4, i++)
+	{
+		this->pinRX[i] = pinRX[i];
+		pinMode(this->pinRX[i], INPUT);
+	}
 }
-
+Azimutal::Azimutal(int pinRX[0], int pinRX[1], int pinRX[2], int pinRX[3], int pinSM0, int pinSM1, int pinSM2, int pinSM3, int nbrSteps) : Stepper(nbrSteps, pinSM0, pinSM1, pinSM2, pinSM3)
+{
+	for (int i = 0, i < 4, i++)
+	{
+		this->pinRX[i] = pinRX[i];
+		pinMode(this->pinRX[i], INPUT);
+	}
+}
+Azimutal::Azimutal(int pinRX[0], int pinRX[1], int pinRX[2], int pinRX[3], int pinSM0, int pinSM1, int pinSM2, int pinSM3, int pinSM4, int nbrSteps) : Stepper(nbrSteps, pinSM0, pinSM1, pinSM2, pinSM3, pinSM4)
+{
+	for (int i = 0, i < 4, i++)
+	{
+		this->pinRX[i] = pinRX[i];
+		pinMode(this->pinRX[i], INPUT);
+	}
+}
 
 Azimutal::~Azimutal()
 {
