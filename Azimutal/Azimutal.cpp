@@ -79,25 +79,33 @@ float Azimutal::map_f(float number, float minI, float maxI, float minF, float ma
 	if (p < minF) p = minF;
 	return p;
 }
+bool  Azimutal::filter(float x)
+{
+	bool answer = false;
+	//onde filtra com un unidades
+	for (int i = 0; i < filterSize; i++)
+	{
+		if (x <= this->filtre[i] + this->un && x >= this->filtre[i] - this->un) answer = true;
+	}
+
+	//atualiza o filtro
+	for (int i = 0; i < filterSize; i++)
+	{
+		if (i < 2)
+		{
+			this->filtre[i] = this->filtre[i + 1];
+		}
+		else this->filtre[i] = x;
+	}
+	return answer;
+}
 
 float readStep(void)
 {
 	float x = this->readPWM(this->pinRX[0]);
-	bool enable = true;
-
 	//cria o buraco do zero
 	if (-(this->nullHole) < x || x < this->nullHole) x = 0;
 
-	//Filtra leitura de acordo com filterSize
-	while (enable)
-	{
-		for (int i = 0; i < filterSize; i++)
-		{
-			if (x <= filter[i] - filter[i] * secInt || x >= filter[i] + filter[i] * secInt) enable = false;
-
-			x = readPWM(pinoPWM_1, maxPulse, minPulse);
-		}
-
-	}
-	return x + shouldIReverse();
+	if (this->filter(x)) return x + this->shouldIReverse(); 
+	else                 return getCurrentStep(void) + shouldIReverse
 }

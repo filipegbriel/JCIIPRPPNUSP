@@ -96,6 +96,7 @@ class Stepper {
     // mover method:
     void step(int number_of_steps);
 	int getNbrSteps(void);
+	int getCurrentStep(void);
     int version(void);
 
 protected:

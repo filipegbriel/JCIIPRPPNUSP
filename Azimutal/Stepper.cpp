@@ -177,6 +177,11 @@ void Stepper::setSpeed(long whatSpeed)
   this->step_delay = 60L * 1000L * 1000L / this->number_of_steps / whatSpeed;
 }
 
+int getCurrentStep(void)
+{
+	return this->step_number;
+}
+
 int getNbrSteps(void)
 {
 	return this->number_of_steps;

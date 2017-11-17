@@ -18,6 +18,7 @@
 #ifndef Azimutal_h
 #define Azimutal_h
 #include "Stepper.h"
+#define filterSize 3
 class Azimutal : public Stepper
 {
 public:
@@ -44,6 +45,11 @@ private:
 	//metodos privados
 	float map_f(float number, float minI, float maxI, float minF, float maxF);
 	float readPWM(int pin);
+	bool filter(float x);
+
 	float nullHole;
+	const float un = 10;
+	float filtre[filterSize] = { 0, 0, 0};
+	
 };
 #endif
