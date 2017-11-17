@@ -30,18 +30,20 @@ public:
 				int pinSM0, int pinSM1, int pinSM2, int pinSM3, int pinSM4, int nbrSteps);
 	
 	//Constantes de calibração
-	bool setConstStep(float minStep, float maxStep);
+	bool setConstStep(float ctrlConf);
 	bool setConstPWM(float minPWM, float maxPWM);
+	bool setConstNH(float nullHole);
 
 private:
 	int pinRX[4]; //pinos do Receptor
 
 	//constantes de calibração
 	float minPWM, maxPWM;				//min e max leitura analogica do pwm.
-	float minStep, maxStep;				//min e max abertura do Azimutal.
+	float ctrlConf;
 
 	//metodos privados
 	float map_f(float number, float minI, float maxI, float minF, float maxF);
 	float readPWM(int pin);
+	float nullHole;
 };
 #endif

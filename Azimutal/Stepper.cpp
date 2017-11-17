@@ -177,6 +177,11 @@ void Stepper::setSpeed(long whatSpeed)
   this->step_delay = 60L * 1000L * 1000L / this->number_of_steps / whatSpeed;
 }
 
+int getNbrSteps(void)
+{
+	return this->number_of_steps;
+}
+
 /*
  * Moves the motor steps_to_move steps.  If the number is negative,
  * the motor moves in the reverse direction.
