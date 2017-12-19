@@ -45,11 +45,13 @@ Azimutal::Azimutal(int pinRX[0], int pinRX[1], int pinRX[2], int pinRX[3], int p
 }
 
 //Configurando as constantes de calibração:
+/* não lembro o que faz, tirar se não servir pra nada
 bool Azimutal::setConstStep(float ctrlConf)
 {
 	this->ctrlConf = ctrlConf;
-	return bool;
+	return true;
 }
+*/
 bool Azimutal::setConstPWM(float minPWM, float maxPWM)
 {
 	this->minPWM = minPWM;
@@ -62,6 +64,16 @@ bool Azimutal::setConstNH(float nullHole)
 		this->nullHole = nullHole;
 		return true;	
 }
+bool Azimutal::setRestrition(float res)
+{
+	this->restrition = res;
+	return true;
+}
+bool Azimutal::setDriverConf(int num)
+{
+	this->driverConf = num;
+	return true;
+}
 
 //Métodos privados
 float Azimutal::readPWM(int pin)
@@ -70,7 +82,7 @@ float Azimutal::readPWM(int pin)
 	if (x > this->maxPWM) x = maxPWM;
 	else if (x < this->minPWM) x = minPWM;
 
-	return map_f((float)x, minPWM, maxPWM, -(this->getNbrSteps*this->ctrlConf)/2, this->getNbrSteps*this->ctrlConf)/2;
+	return map_f((float)x, minPWM, maxPWM, 100.0, 0);
 }
 float Azimutal::map_f(float number, float minI, float maxI, float minF, float maxF)
 {
@@ -81,11 +93,11 @@ float Azimutal::map_f(float number, float minI, float maxI, float minF, float ma
 }
 bool  Azimutal::filter(float x)
 {
-	bool answer = false;
+	bool answer = true;
 	//onde filtra com un unidades
 	for (int i = 0; i < filterSize; i++)
 	{
-		if (x <= this->filtre[i] + this->un && x >= this->filtre[i] - this->un) answer = true;
+		if (x <= this->filtre[i] + this->un && x >= this->filtre[i] - this->un) answer = false;
 	}
 
 	//atualiza o filtro
@@ -98,6 +110,13 @@ bool  Azimutal::filter(float x)
 		else this->filtre[i] = x;
 	}
 	return answer;
+}
+float Azimutal::readStep(void)
+{
+	//essa função le o pwm e o transforma em um passo entre o passo minimo e o passo maximo.
+	float x = readPWM(pinRX[0]);
+	x = map_f(x, 0.0, 100.0, -100.0, 100.0);
+	return this->getNbrSteps() * this->driverConf * this->restrition * x / 100;
 }
 
 float readStep(void)

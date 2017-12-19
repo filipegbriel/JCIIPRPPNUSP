@@ -31,21 +31,29 @@ public:
 				int pinSM0, int pinSM1, int pinSM2, int pinSM3, int pinSM4, int nbrSteps);
 	
 	//Constantes de calibração
-	bool setConstStep(float ctrlConf);
+	//bool setConstStep(float ctrlConf); //escala do Controle; deixar em 100
 	bool setConstPWM(float minPWM, float maxPWM);
 	bool setConstNH(float nullHole);
+	bool setRestrition(float res);
+	bool setDriverConf(int num); //configuração do driver
 
 private:
 	int pinRX[4]; //pinos do Receptor
+	/*
+	pinRX[] = alavanca de posição
+	*/
 
 	//constantes de calibração
 	float minPWM, maxPWM;				//min e max leitura analogica do pwm.
-	float ctrlConf;
+	float restrition;				//no modo normal é a restrição do quanto pode ir ao lado
+	int	  driverConf
+										// float ctrlConf = 100;
 
 	//metodos privados
 	float map_f(float number, float minI, float maxI, float minF, float maxF);
 	float readPWM(int pin);
 	bool filter(float x);
+	float readStep(void);
 
 	float nullHole;
 	const float un = 10;
