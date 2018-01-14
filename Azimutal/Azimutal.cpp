@@ -111,12 +111,54 @@ bool  Azimutal::filter(float x)
 	}
 	return answer;
 }
-float Azimutal::readStep(void)
+int Azimutal::readStep(void)
 {
 	//essa função le o pwm e o transforma em um passo entre o passo minimo e o passo maximo.
 	float x = readPWM(pinRX[0]);
 	x = map_f(x, 0.0, 100.0, -100.0, 100.0);
 	return this->getNbrSteps() * this->driverConf * this->restrition * x / 100;
+}
+
+//IDENTIFICAÇÃO DE PRIORIDADE
+int Azimutal::idPriority(void)
+{
+	if (readPWM(pinRX[3]) < 20)			return 4; //alavanca panico
+	else if (readPWM(pinRX[2]) > 50)	return 3; //alavanca adição 180
+	else if (readPWM(pinRX[1]) > 50)	return 2; //alavanca adição 90
+	else								return 1; //alavanca principal
+}
+
+bool Azimutal::routine(void)
+{
+	//PRIMEIRO PASSO: IDENTIFICAR PRIORIDADE DE AÇÃO
+	int priority = idPriority(void);
+	int add = 0;
+
+	if (priority == 4) 
+	{//procurar pelo zero
+		lookForZero(void); //FALTA FAZER E MOVETOSTEP
+		return;
+	}
+
+	if (priority == 3)
+	{//adicione 180
+		add = this->getNbrSteps(void) / 2;
+		priority = 1;
+	}
+
+	if (priority == 2)
+	{//adicione 90
+		if (readPWM(pinRX[0]) < 30)
+			moveToStep(this->getNbrSteps(void) / 4);
+		else moveToStep((3 * this->getNbrSteps(void)) / 4);
+		return true;
+	}
+
+	if (priority == 1)
+	{//normal
+		moveToStep(readStep(void) + add);
+		return true;
+	}
 }
 
 float readStep(void)
