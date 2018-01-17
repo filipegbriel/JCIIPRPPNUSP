@@ -19,35 +19,44 @@
  */
 
 
-Azimutal::Azimutal(int pinRX[0], int pinRX[1], int pinRX[2], int pinRX[3], int pinSM0, int pinSM1, int nbrSteps, int pinNS) : Stepper(nbrSteps, pinSM0, pinSM1)
+Azimutal::Azimutal(int pinRX0, int pinRX1, int pinRX2, int pinRX3, int pinSM0, int pinSM1, int nbrSteps, int pinNS) : Stepper(nbrSteps, pinSM0, pinSM1)
 {
-	for (int i = 0, i < 4, i++)
-	{
-		this->pinRX[i] = pinRX[i];
-		pinMode(this->pinRX[i], INPUT);
-	}
+		this->pinRX0 = pinRX0;
+		pinMode(this->pinRX0, INPUT);
+		this->pinRX1 = pinRX1;
+		pinMode(this->pinRX1, INPUT);
+		this->pinRX2 = pinRX2;
+		pinMode(this->pinRX, INPUT);
+		this->pinRX3 = pinRX3;
+		pinMode(this->pinRX3, INPUT);
 
 	this->pinNS = pinNS;
 	pinMode(this->pinNS, INPUT);
 }
-Azimutal::Azimutal(int pinRX[0], int pinRX[1], int pinRX[2], int pinRX[3], int pinSM0, int pinSM1, int pinSM2, int pinSM3, int nbrSteps, int pinNS) : Stepper(nbrSteps, pinSM0, pinSM1, pinSM2, pinSM3)
+Azimutal::Azimutal(int pinRX0, int pinRX1, int pinRX2, int pinRX3, int pinSM0, int pinSM1, int pinSM2, int pinSM3, int nbrSteps, int pinNS) : Stepper(nbrSteps, pinSM0, pinSM1, pinSM2, pinSM3)
 {
-	for (int i = 0, i < 4, i++)
-	{
-		this->pinRX[i] = pinRX[i];
-		pinMode(this->pinRX[i], INPUT);
-	}
+	this->pinRX0 = pinRX0;
+	pinMode(this->pinRX0, INPUT);
+	this->pinRX1 = pinRX1;
+	pinMode(this->pinRX1, INPUT);
+	this->pinRX2 = pinRX2;
+	pinMode(this->pinRX, INPUT);
+	this->pinRX3 = pinRX3;
+	pinMode(this->pinRX3, INPUT);
 
 	this->pinNS = pinNS;
 	pinMode(this->pinNS, INPUT);
 }
-Azimutal::Azimutal(int pinRX[0], int pinRX[1], int pinRX[2], int pinRX[3], int pinSM0, int pinSM1, int pinSM2, int pinSM3, int pinSM4, int nbrSteps, int pinNS) : Stepper(nbrSteps, pinSM0, pinSM1, pinSM2, pinSM3, pinSM4)
+Azimutal::Azimutal(int pinRX0, int pinRX1, int pinRX2, int pinRX3, int pinSM0, int pinSM1, int pinSM2, int pinSM3, int pinSM4, int nbrSteps, int pinNS) : Stepper(nbrSteps, pinSM0, pinSM1, pinSM2, pinSM3, pinSM4)
 {
-	for (int i = 0, i < 4, i++)
-	{
-		this->pinRX[i] = pinRX[i];
-		pinMode(this->pinRX[i], INPUT);
-	}
+	this->pinRX0 = pinRX0;
+	pinMode(this->pinRX0, INPUT);
+	this->pinRX1 = pinRX1;
+	pinMode(this->pinRX1, INPUT);
+	this->pinRX2 = pinRX2;
+	pinMode(this->pinRX, INPUT);
+	this->pinRX3 = pinRX3;
+	pinMode(this->pinRX3, INPUT);
 
 	this->pinNS = pinNS;
 	pinMode(this->pinNS, INPUT);
@@ -125,7 +134,7 @@ bool Azimutal::filter(float x)
 int	 Azimutal::readStep(void)
 {
 	//essa função le o pwm e o transforma em um passo entre o passo minimo e o passo maximo.
-	float x = readPWM(pinRX[0]);
+	float x = readPWM(pinRX0);
 	x = map_f(x, 0.0, 100.0, -100.0, 100.0);
 	//transformando de porcentagem pra passo
 	return this->getNbrSteps() * this->driverConf * this->restrition * x / 100;
@@ -142,9 +151,9 @@ void Azimutal::moveToStep(int target)
 //IDENTIFICAÇÃO DE PRIORIDADE
 int Azimutal::idPriority(void)
 {
-	if (readPWM(pinRX[3]) < 20)			return 4; //alavanca panico
-	else if (readPWM(pinRX[2]) > 50)	return 3; //alavanca adição 180
-	else if (readPWM(pinRX[1]) > 50)	return 2; //alavanca adição 90
+	if (readPWM(pinRX3) < 20)			return 4; //alavanca panico
+	else if (readPWM(pinRX2) > 50)	return 3; //alavanca adição 180
+	else if (readPWM(pinRX1) > 50)	return 2; //alavanca adição 90
 	else								return 1; //alavanca principal
 }
 
@@ -176,7 +185,7 @@ bool Azimutal::routine(void)
 		priority = 1;
 
 	case 2:					//adicione 90
-		if (readPWM(pinRX[0]) < 30)
+		if (readPWM(pinRX0) < 30)
 			moveToStep(this->getNbrSteps() / 4);
 		else moveToStep((3 * this->getNbrSteps()) / 4);
 		break;
@@ -195,7 +204,7 @@ bool Azimutal::routine(void)
 
 float readStep(void)
 {
-	float x = this->readPWM(this->pinRX[0]);
+	float x = this->readPWM(this->pinRX0);
 	//cria o buraco do zero
 	if (-(this->nullHole) < x || x < this->nullHole) x = 0;
 

@@ -23,12 +23,12 @@ class Azimutal : public Stepper
 {
 public:
 	//construtures para todos os casos de motor de passo
-	Azimutal(int pinRX[0], int pinRX[1], int pinRX[2], int pinRX[3],
-		int pinSM0, int pinSM1, int nbrSteps);
-	Azimutal(int pinRX[0], int pinRX[1], int pinRX[2], int pinRX[3],
-				int pinSM0, int pinSM1, int pinSM2, int pinSM3, int nbrSteps);
-	Azimutal(int pinRX[0], int pinRX[1], int pinRX[2], int pinRX[3],
-				int pinSM0, int pinSM1, int pinSM2, int pinSM3, int pinSM4, int nbrSteps);
+	Azimutal(int pinRX0, int pinRX1, int pinRX2, int pinRX3,
+		int pinSM0, int pinSM1, int nbrSteps, int pinNS);
+	Azimutal(int pinRX0, int pinRX1, int pinRX2, int pinRX3,
+				int pinSM0, int pinSM1, int pinSM2, int pinSM3, int nbrSteps, int pinNS);
+	Azimutal(int pinRX0, int pinRX1, int pinRX2, int pinRX3,
+				int pinSM0, int pinSM1, int pinSM2, int pinSM3, int pinSM4, int nbrSteps, int pinNS);
 	
 	//Constantes de calibração
 	//bool setConstStep(float ctrlConf); //escala do Controle; deixar em 100
@@ -41,7 +41,10 @@ public:
 	bool routine(void);
 
 private:
-	int pinRX[4]; //pinos do Receptor
+	int pinRX0;
+	int pinRX1;
+	int pinRX2;
+	int pinRX3;//pinos do Receptor
 	/*
 	pinRX[] = alavanca de posição
 	*/
@@ -60,6 +63,8 @@ private:
 	void moveToStep(int target);
 	
 	int idPriority(void);
+
+	void lookForZero(void);
 	
 	float nullHole;
 	const float un = 10;
