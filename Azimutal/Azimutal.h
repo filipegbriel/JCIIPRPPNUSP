@@ -37,6 +37,9 @@ public:
 	bool setRestrition(float res);
 	bool setDriverConf(int num); //configuração do driver
 
+	//FUNCAO ROTINA: COMO TDO FUNCIONA
+	bool routine(void);
+
 private:
 	int pinRX[4]; //pinos do Receptor
 	/*
@@ -46,14 +49,17 @@ private:
 	//constantes de calibração
 	float minPWM, maxPWM;				//min e max leitura analogica do pwm.
 	float restrition;				//no modo normal é a restrição do quanto pode ir ao lado
-	int	  driverConf									// float ctrlConf = 100;
+	int	  driverConf;									// float ctrlConf = 100;
 
 	//metodos privados
 	float map_f(float number, float minI, float maxI, float minF, float maxF);
 	float readPWM(int pin);
 	bool filter(float x);
 	int readStep(void);
-
+	void moveToStep(int target);
+	
+	int idPriority(void);
+	
 	float nullHole;
 	const float un = 10;
 	float filtre[filterSize] = { 0, 0, 0};

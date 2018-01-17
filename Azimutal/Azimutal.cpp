@@ -91,7 +91,9 @@ float Azimutal::map_f(float number, float minI, float maxI, float minF, float ma
 	if (p < minF) p = minF;
 	return p;
 }
-bool  Azimutal::filter(float x)
+
+
+bool Azimutal::filter(float x)
 {
 	bool answer = true;
 	//onde filtra com un unidades
@@ -111,12 +113,19 @@ bool  Azimutal::filter(float x)
 	}
 	return answer;
 }
-int Azimutal::readStep(void)
+int	 Azimutal::readStep(void)
 {
 	//essa função le o pwm e o transforma em um passo entre o passo minimo e o passo maximo.
 	float x = readPWM(pinRX[0]);
 	x = map_f(x, 0.0, 100.0, -100.0, 100.0);
+	//transformando de porcentagem pra passo
 	return this->getNbrSteps() * this->driverConf * this->restrition * x / 100;
+}
+
+void Azimutal::moveToStep(int target)
+{
+	Stepper::step(target);
+	return void;
 }
 
 //IDENTIFICAÇÃO DE PRIORIDADE
@@ -129,36 +138,37 @@ int Azimutal::idPriority(void)
 }
 
 bool Azimutal::routine(void)
-{
-	//PRIMEIRO PASSO: IDENTIFICAR PRIORIDADE DE AÇÃO
-	int priority = idPriority(void);
+{//retorna falso se ocorrer problema.
+	int priority = idPriority();
 	int add = 0;
 
-	if (priority == 4) 
-	{//procurar pelo zero
-		lookForZero(void); //FALTA FAZER E MOVETOSTEP
-		return;
-	}
+	bool operation = true;
+	switch (priority)
+	{
+	case 4:					//procurar pelo zero
+		lookForZero();			//FALTA FAZER E MOVETOSTEP
+		break;
 
-	if (priority == 3)
-	{//adicione 180
-		add = this->getNbrSteps(void) / 2;
+	case 3:					//adicione 180
+		add = this->getNbrSteps() / 2;
 		priority = 1;
-	}
 
-	if (priority == 2)
-	{//adicione 90
+	case 2:					//adicione 90
 		if (readPWM(pinRX[0]) < 30)
-			moveToStep(this->getNbrSteps(void) / 4);
-		else moveToStep((3 * this->getNbrSteps(void)) / 4);
-		return true;
+			moveToStep(this->getNbrSteps() / 4);
+		else moveToStep((3 * this->getNbrSteps()) / 4);
+		break;
+
+	case 1:					//normal
+		moveToStep(readStep() + add);
+		break;
+
+	default:
+		operation = false;
+		break;
 	}
 
-	if (priority == 1)
-	{//normal
-		moveToStep(readStep(void) + add);
-		return true;
-	}
+	return operation;
 }
 
 float readStep(void)
