@@ -45,6 +45,7 @@ private:
 	/*
 	pinRX[] = alavanca de posição
 	*/
+	int pinNS;
 
 	//constantes de calibração
 	float minPWM, maxPWM;				//min e max leitura analogica do pwm.

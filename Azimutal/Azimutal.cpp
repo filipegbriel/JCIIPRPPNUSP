@@ -19,29 +19,38 @@
  */
 
 
-Azimutal::Azimutal(int pinRX[0], int pinRX[1], int pinRX[2], int pinRX[3], int pinSM0, int pinSM1, int nbrSteps) : Stepper(nbrSteps, pinSM0, pinSM1)
+Azimutal::Azimutal(int pinRX[0], int pinRX[1], int pinRX[2], int pinRX[3], int pinSM0, int pinSM1, int nbrSteps, int pinNS) : Stepper(nbrSteps, pinSM0, pinSM1)
 {
 	for (int i = 0, i < 4, i++)
 	{
 		this->pinRX[i] = pinRX[i];
 		pinMode(this->pinRX[i], INPUT);
 	}
+
+	this->pinNS = pinNS;
+	pinMode(this->pinNS, INPUT);
 }
-Azimutal::Azimutal(int pinRX[0], int pinRX[1], int pinRX[2], int pinRX[3], int pinSM0, int pinSM1, int pinSM2, int pinSM3, int nbrSteps) : Stepper(nbrSteps, pinSM0, pinSM1, pinSM2, pinSM3)
+Azimutal::Azimutal(int pinRX[0], int pinRX[1], int pinRX[2], int pinRX[3], int pinSM0, int pinSM1, int pinSM2, int pinSM3, int nbrSteps, int pinNS) : Stepper(nbrSteps, pinSM0, pinSM1, pinSM2, pinSM3)
 {
 	for (int i = 0, i < 4, i++)
 	{
 		this->pinRX[i] = pinRX[i];
 		pinMode(this->pinRX[i], INPUT);
 	}
+
+	this->pinNS = pinNS;
+	pinMode(this->pinNS, INPUT);
 }
-Azimutal::Azimutal(int pinRX[0], int pinRX[1], int pinRX[2], int pinRX[3], int pinSM0, int pinSM1, int pinSM2, int pinSM3, int pinSM4, int nbrSteps) : Stepper(nbrSteps, pinSM0, pinSM1, pinSM2, pinSM3, pinSM4)
+Azimutal::Azimutal(int pinRX[0], int pinRX[1], int pinRX[2], int pinRX[3], int pinSM0, int pinSM1, int pinSM2, int pinSM3, int pinSM4, int nbrSteps, int pinNS) : Stepper(nbrSteps, pinSM0, pinSM1, pinSM2, pinSM3, pinSM4)
 {
 	for (int i = 0, i < 4, i++)
 	{
 		this->pinRX[i] = pinRX[i];
 		pinMode(this->pinRX[i], INPUT);
 	}
+
+	this->pinNS = pinNS;
+	pinMode(this->pinNS, INPUT);
 }
 
 //Configurando as constantes de calibração:
@@ -128,6 +137,8 @@ void Azimutal::moveToStep(int target)
 	return void;
 }
 
+
+
 //IDENTIFICAÇÃO DE PRIORIDADE
 int Azimutal::idPriority(void)
 {
@@ -135,6 +146,17 @@ int Azimutal::idPriority(void)
 	else if (readPWM(pinRX[2]) > 50)	return 3; //alavanca adição 180
 	else if (readPWM(pinRX[1]) > 50)	return 2; //alavanca adição 90
 	else								return 1; //alavanca principal
+}
+
+void Azimutal::lookForZero(void)
+{
+	access = true;
+	while (access)
+	{
+		if (digitalRead(pinNS) == HIGH)	break;
+		else	Stepper::step(1);
+	}
+	return void;
 }
 
 bool Azimutal::routine(void)
@@ -146,11 +168,11 @@ bool Azimutal::routine(void)
 	switch (priority)
 	{
 	case 4:					//procurar pelo zero
-		lookForZero();			//FALTA FAZER E MOVETOSTEP
+		lookForZero();			//FALTA FAZER
 		break;
 
 	case 3:					//adicione 180
-		add = this->getNbrSteps() / 2;
+		add = (this->getNbrSteps() * this->driverConf) / 2;
 		priority = 1;
 
 	case 2:					//adicione 90
