@@ -26,7 +26,7 @@ Azimutal::Azimutal(int pinRX0, int pinRX1, int pinRX2, int pinRX3, int pinSM0, i
 		this->pinRX1 = pinRX1;
 		pinMode(this->pinRX1, INPUT);
 		this->pinRX2 = pinRX2;
-		pinMode(this->pinRX, INPUT);
+		pinMode(this->pinRX2, INPUT);
 		this->pinRX3 = pinRX3;
 		pinMode(this->pinRX3, INPUT);
 
@@ -112,12 +112,13 @@ float Azimutal::map_f(float number, float minI, float maxI, float minF, float ma
 
 
 bool Azimutal::filter(float x)
-{
+{	//RETORNA FALSO SE X' FOR TREMULAÇÃO DE X
+
 	bool answer = true;
 	//onde filtra com un unidades
 	for (int i = 0; i < filterSize; i++)
 	{
-		if (x <= this->filtre[i] + this->un && x >= this->filtre[i] - this->un) answer = false;
+		if (x <= this->filtre[i] + this->un && x >= this->filtre[i] - this->un) answer = false; // un explicado no .h
 	}
 
 	//atualiza o filtro
@@ -145,8 +146,6 @@ void Azimutal::moveToStep(int target)
 	Stepper::step(target);
 	return void;
 }
-
-
 
 //IDENTIFICAÇÃO DE PRIORIDADE
 int Azimutal::idPriority(void)

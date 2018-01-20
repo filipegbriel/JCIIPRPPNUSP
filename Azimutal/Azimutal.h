@@ -29,6 +29,7 @@ public:
 				int pinSM0, int pinSM1, int pinSM2, int pinSM3, int nbrSteps, int pinNS);
 	Azimutal(int pinRX0, int pinRX1, int pinRX2, int pinRX3,
 				int pinSM0, int pinSM1, int pinSM2, int pinSM3, int pinSM4, int nbrSteps, int pinNS);
+		
 	
 	//Constantes de calibração
 	//bool setConstStep(float ctrlConf); //escala do Controle; deixar em 100
@@ -39,16 +40,15 @@ public:
 
 	//FUNCAO ROTINA: COMO TDO FUNCIONA
 	bool routine(void);
-
+	
+	
 private:
+
 	int pinRX0;
 	int pinRX1;
 	int pinRX2;
 	int pinRX3;//pinos do Receptor
-	/*
-	pinRX[] = alavanca de posição
-	*/
-	int pinNS;
+	int pinNS; //fim de curso
 
 	//constantes de calibração
 	float minPWM, maxPWM;				//min e max leitura analogica do pwm.
@@ -58,7 +58,6 @@ private:
 	//metodos privados
 	float map_f(float number, float minI, float maxI, float minF, float maxF);
 	float readPWM(int pin);
-	bool filter(float x);
 	int readStep(void);
 	void moveToStep(int target);
 	
@@ -67,8 +66,10 @@ private:
 	void lookForZero(void);
 	
 	float nullHole;
-	const float un = 10;
-	float filtre[filterSize] = { 0, 0, 0};
+
+	bool filter(float x);
+	float filtre[filterSize] = { 0, 0, 0 };
+	const float un = 10; //precisão do filtro, NAO PODE SER PORCENTAGEM DE X
 	
 };
 #endif
