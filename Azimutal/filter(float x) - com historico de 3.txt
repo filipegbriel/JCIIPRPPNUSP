@@ -1,0 +1,36 @@
+//RETORNA FALSO SE X' FOR TREMULAÇÃO DE X
+
+	bool answer = true;
+	bool valid  = true;
+	
+	//verifica se o filtro esta valido
+	float test = this->filtre[0];
+	for (int i = 1; i < filterSize; i++)
+	{
+		if (!(test <= this->filtre[i] + this->un && test >= this->filtre[i] - this->un)) valid = false;
+	}
+	
+	//onde filtra com un unidades
+	for (int i = 0; i < filterSize; i++)
+	{
+		if (x <= this->filtre[i] + this->un && x >= this->filtre[i] - this->un) answer = false; // un explicado no .h
+	}
+
+	//atualiza o filtro
+	for (int i = 0; i < filterSize; i++)
+	{
+		if (i < 2)
+		{
+			this->filtre[i] = this->filtre[i + 1];
+		}
+		else this->filtre[i] = x;
+	}
+
+	/*******************************************
+	para compreender o return, segue o karnough:
+	valid | action->>   0    1
+		  V       0		1	 1
+				  
+				  1		0	 1
+	********************************************/
+	return (answer + !valid);
