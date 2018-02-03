@@ -98,15 +98,16 @@ class Stepper {
 	int getNbrSteps(void);
 	int getCurrentStep(void);
     int version(void);
+	
 
 protected:
     void stepMotor(int this_step);
-
+	int step_number;          // which step the motor is on
     int direction;            // Direction of rotation
     unsigned long step_delay; // delay between steps, in ms, based on speed
-    int number_of_steps;      // total number of steps this motor can take
+	int number_of_steps;      // total number of steps this motor can take
     int pin_count;            // how many pins are in use.
-    int step_number;          // which step the motor is on
+    
 
     // motor pin numbers:
     int motor_pin_1;

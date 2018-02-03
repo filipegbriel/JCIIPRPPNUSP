@@ -32,9 +32,10 @@
 #ifndef		Azimutal_h
 #define		Azimutal_h
 #include	"Stepper.h"
-#define		filterSize			3		//minimo 2
+#include	"Arduino.h"
+
 #define		rotation			1		//sentido de rotacao do usado pelo sensor do zero, deve ser 1 ou menos 1
-#define     nullVerification	true	//determina se deve usar o sensor do zero ou nao
+
 class Azimutal : public Stepper
 {
 public:
@@ -57,7 +58,9 @@ public:
 
 	//FUNCAO ROTINA: COMO TDO FUNCIONA
 	bool	routine(void);
-	
+
+	int		idPriority(void);
+
 private:
 
 	int		pinRX0;
@@ -66,7 +69,9 @@ private:
 	int		pinRX3;//pinos do Receptor
 	int		pinNS; //fim de curso
 
-		//constantes de calibração
+	const bool nullVerification = false;  	//determina se deve usar o sensor do zero ou nao
+
+	//constantes de calibração
 	float	minPWM, maxPWM;				//min e max leitura analogica do pwm.
 	float	restrition;					//no modo normal é a restrição do quanto pode ir ao lado
 	int		driverConf;					//conf de ultiplicacao de passos do driver				
@@ -80,14 +85,14 @@ private:
 	int		readStep(void);
 	void	moveToStep(int target);
 	
-	int		idPriority(void);
+	//int		idPriority(void);
 
 	void	lookForZero(void);
 		
 	float	nullHole;
 
 	bool	filter(int x);
-	int		Interactions[filterSize];
+	int		lastStep;
 	const float un = 10; //precisão do filtro, NAO PODE SER PORCENTAGEM DE X
 	
 };

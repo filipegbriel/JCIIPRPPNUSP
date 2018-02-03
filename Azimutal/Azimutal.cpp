@@ -35,9 +35,7 @@ Azimutal::Azimutal(int pinRX0, int pinRX1, int pinRX2, int pinRX3, int pinSM0, i
 	this->pinNS = pinNS;
 	pinMode(this->pinNS, INPUT_PULLUP);
 
-	for(int i = 0; i < filterSize; i++)
-		this->Interactions[i] = 0;
-				
+	this->lastStep = 0;
 }
 Azimutal::Azimutal(int pinRX0, int pinRX1, int pinRX2, int pinRX3, int pinSM0, int pinSM1, int pinSM2, int pinSM3, int nbrSteps, int pinNS) : Stepper(nbrSteps, pinSM0, pinSM1, pinSM2, pinSM3)
 {
@@ -52,9 +50,7 @@ Azimutal::Azimutal(int pinRX0, int pinRX1, int pinRX2, int pinRX3, int pinSM0, i
 	this->pinNS = pinNS;
 	pinMode(this->pinNS, INPUT_PULLUP);
 
-	for (int i = 0; i < filterSize; i++)
-		this->Interactions[i] = 0;
-
+	this->lastStep = 0;
 }
 Azimutal::Azimutal(int pinRX0, int pinRX1, int pinRX2, int pinRX3, int pinSM0, int pinSM1, int pinSM2, int pinSM3, int pinSM4, int nbrSteps, int pinNS) : Stepper(nbrSteps, pinSM0, pinSM1, pinSM2, pinSM3, pinSM4)
 {
@@ -69,19 +65,10 @@ Azimutal::Azimutal(int pinRX0, int pinRX1, int pinRX2, int pinRX3, int pinSM0, i
 	this->pinNS = pinNS;
 	pinMode(this->pinNS, INPUT_PULLUP);
 
-	for (int i = 0; i < filterSize; i++)
-		this->Interactions[i] = 0;
-
+	this->lastStep = 0;
 }
 
-//Configurando as constantes de calibração:
-/* não lembro o que faz, tirar se não servir pra nada
-bool Azimutal::setConstStep(float ctrlConf)
-{
-	this->ctrlConf = ctrlConf;
-	return true;
-}
-*/
+
 bool Azimutal::setConstPWM(float minPWM, float maxPWM)
 {
 	this->minPWM = minPWM;
@@ -120,7 +107,7 @@ float Azimutal::readPWM(int pin)
 	if (x > this->maxPWM) x = maxPWM;
 	else if (x < this->minPWM) x = minPWM;
 
-	return map_f((float)x, minPWM, maxPWM, 100.0, 0);
+	return map_f((float)x, minPWM, maxPWM, 0.0, 100.0);
 }
 float Azimutal::map_f(float number, float minI, float maxI, float minF, float maxF)
 {
@@ -135,17 +122,8 @@ bool Azimutal::filter(int x)
 	
 	//Discretização do intervalo
 	bool answer = true;
-	if (x <= this->Interactions[2] + this->un && x >= this->Interactions[2] - this->un) answer = false;
-	else 
-	{
-		Interactions[filterSize - 1] = 0;
-		for (int i = 0; i < filterSize - 1; i++)
-		{
-			this->Interactions[i] = this->Interactions[i + 1];
-			this->Interactions[filterSize - 1] += Interactions[i];
-		}
-		Interactions[filterSize - 1] = Interactions[filterSize - 1] / filterSize;
-	};
+	if (x <= this->lastStep + this->un && x >= this->lastStep - this->un) answer = false;
+	else															  this->lastStep = x;
 	
 	return answer;
 }
@@ -167,7 +145,8 @@ void Azimutal::moveToStep(int target)
 	if (!filter(target)) return;
 	
 	//caso queiramos ir ao zero
-	if (Interactions[filterSize - 1] > -this->nullHole && Interactions[filterSize - 1] < this->nullHole)
+	int delta = abs(target - Stepper::getCurrentStep());
+	if ( delta > -this->nullHole && delta < this->nullHole)
 	{
 		/***************************************************************
 		Tres casos:
@@ -178,28 +157,30 @@ void Azimutal::moveToStep(int target)
 		if (this->nullVerification) lookForZero();
 		else
 		{
-			if (Interactions[filterSize - 2] > -this->nullHole && Interactions[filterSize - 2] < this->nullHole)
+			if (Stepper::getCurrentStep() > -this->nullHole && Stepper::getCurrentStep() < this->nullHole)
 				return; //aqui ja estamos no zero, e queremos continuar
 			else
-				Stepper::step(-(this->Interactions[filterSize - 2]));
+				Stepper::step(-1 * (Stepper::getCurrentStep()));
 		}
 	}
 	else
-		Stepper::step( this->Interactions[filterSize - 2] - this->Interactions[filterSize - 1] );
+		Stepper::step(delta);
 	
 	return;
 }
 
 int Azimutal::idPriority(void)
 {
-	if (readPWM(pinRX3) < 20)			return 4; //alavanca panico
-	else if (readPWM(pinRX2) > 50)		return 3; //alavanca adição 180
-	else if (readPWM(pinRX1) > 50)		return 2; //alavanca adição 90
-	else								return 1; //alavanca principal
+	if (readPWM(pinRX3) < 20.0)		     return 4; 	//alavanca panico
+	else if (readPWM(pinRX2) > 50.0)	 return 3;	//alavanca adição 180
+	else if (readPWM(pinRX1) > 50.0)	 return 2;  //alavanca adição 90
+	else								 return 1;	//alavanca principal
 }
 
 void Azimutal::lookForZero(void)
 {
+	if (!nullVerification) return;
+
 	while (true)
 	{
 		if (digitalRead(pinNS) == LOW)	break; //esta no zero, ta check
@@ -231,7 +212,8 @@ bool Azimutal::routine(void)
 
 	case 3:					//adicione 180
 		add = ((this->getNbrSteps() * this->driverConf) / 2) + this->calibration1;
-		priority = 1;
+		moveToStep(readStep() + add);
+		break;
 
 	case 2:					//adicione 90
 		if (readPWM(pinRX0) < 30)
