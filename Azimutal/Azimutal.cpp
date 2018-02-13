@@ -145,8 +145,8 @@ void Azimutal::moveToStep(int target)
 	if (!filter(target)) return;
 	
 	//caso queiramos ir ao zero
-	int delta = abs(target - Stepper::getCurrentStep());
-	if ( delta > -this->nullHole && delta < this->nullHole)
+	int delta = (target - Stepper::getCurrentStep());
+	if ( abs(target) < abs(this->nullHole) )
 	{
 		/***************************************************************
 		Tres casos:
