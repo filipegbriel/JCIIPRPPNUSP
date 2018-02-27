@@ -177,10 +177,10 @@ void Stepper::setSpeed(long whatSpeed)
   this->step_delay = 60L * 1000L * 1000L / this->number_of_steps / whatSpeed;
 }
 
-int Stepper::getCurrentStep(void)
+/*int Stepper::getCurrentStep(void)
 {
-	return this->step_number;
-}
+	return this->theActualStep;
+}*/
 
 	int Stepper::getNbrSteps(void)
 	{
@@ -193,6 +193,7 @@ int Stepper::getCurrentStep(void)
 	 */
 	void Stepper::step(int steps_to_move)
 	{
+		this->theActualStep = steps_to_move;
 		int steps_left = abs(steps_to_move);  // how many steps to take
 
 		// determine direction based on whether steps_to_mode is + or -:

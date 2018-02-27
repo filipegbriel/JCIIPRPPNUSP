@@ -58,10 +58,9 @@ public:
 
 	//FUNCAO ROTINA: COMO TDO FUNCIONA
 	bool	routine(void);
+	int		getCurrentStep(void);
 
-	int		idPriority(void);
-
-private:
+//private:
 
 	int		pinRX0;
 	int		pinRX1;
@@ -84,7 +83,9 @@ private:
 	float	readPWM(int pin);
 	int		readStep(void);
 	void	moveToStep(int target);
-	
+	int		idPriority(void);
+	void    putStep(int target);
+		
 	//int		idPriority(void);
 
 	void	lookForZero(void);
@@ -92,8 +93,9 @@ private:
 	float	nullHole;
 
 	bool	filter(int x);
-	int		lastStep;
-	const float un = 10; //precisão do filtro, NAO PODE SER PORCENTAGEM DE X
+	int		lastStep;    //usada no filtro
+	int		Stepsum;	 //conta o passo atual
+	const float un = 20; //precisão do filtro, NAO PODE SER PORCENTAGEM DE X
 	
 };
 #endif

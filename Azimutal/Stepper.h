@@ -96,7 +96,7 @@ class Stepper {
     // mover method:
     void step(int number_of_steps);
 	int getNbrSteps(void);
-	int getCurrentStep(void);
+	//int getCurrentStep(void);
     int version(void);
 	
 
@@ -115,6 +115,8 @@ protected:
     int motor_pin_3;
     int motor_pin_4;
     int motor_pin_5;          // Only 5 phase motor
+
+	int theActualStep = 0;
 
     unsigned long last_step_time; // time stamp in us of when the last step was taken
 };

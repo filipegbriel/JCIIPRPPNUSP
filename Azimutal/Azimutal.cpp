@@ -36,6 +36,7 @@ Azimutal::Azimutal(int pinRX0, int pinRX1, int pinRX2, int pinRX3, int pinSM0, i
 	pinMode(this->pinNS, INPUT_PULLUP);
 
 	this->lastStep = 0;
+	this->Stepsum = 0;
 }
 Azimutal::Azimutal(int pinRX0, int pinRX1, int pinRX2, int pinRX3, int pinSM0, int pinSM1, int pinSM2, int pinSM3, int nbrSteps, int pinNS) : Stepper(nbrSteps, pinSM0, pinSM1, pinSM2, pinSM3)
 {
@@ -51,6 +52,7 @@ Azimutal::Azimutal(int pinRX0, int pinRX1, int pinRX2, int pinRX3, int pinSM0, i
 	pinMode(this->pinNS, INPUT_PULLUP);
 
 	this->lastStep = 0;
+	this->Stepsum = 0;
 }
 Azimutal::Azimutal(int pinRX0, int pinRX1, int pinRX2, int pinRX3, int pinSM0, int pinSM1, int pinSM2, int pinSM3, int pinSM4, int nbrSteps, int pinNS) : Stepper(nbrSteps, pinSM0, pinSM1, pinSM2, pinSM3, pinSM4)
 {
@@ -66,6 +68,7 @@ Azimutal::Azimutal(int pinRX0, int pinRX1, int pinRX2, int pinRX3, int pinSM0, i
 	pinMode(this->pinNS, INPUT_PULLUP);
 
 	this->lastStep = 0;
+	this->Stepsum = 0;
 }
 
 
@@ -134,19 +137,30 @@ int	 Azimutal::readStep(void)
 	x = map_f(x, 0.0, 100.0, -100.0, 100.0);
 	//transformando de porcentagem pra passo
 	return this->getNbrSteps() * this->driverConf * this->restrition * x / 100; //o resultado eh truncado pelo casting automatico do compilador
+		
 	/**************************************************
 	Este programa trata sempre de variacoes. 
 	Ele vai porcentagem do total pra um lado ou pro outro, 
 	nunca x passos. O sinal indica horario ou anti-horario.
 	**************************************************/
 }
+int Azimutal::getCurrentStep(void)
+{
+	return this->Stepsum;
+}
+void Azimutal::putStep(int target)
+{
+	this->Stepsum += target;
+}
 void Azimutal::moveToStep(int target)
 {
 	if (!filter(target)) return;
 	
 	//caso queiramos ir ao zero
-	int delta = (target - Stepper::getCurrentStep());
-	if ( abs(target) < abs(this->nullHole) )
+	int delta = (target - getCurrentStep());
+	Serial.print(getCurrentStep());
+	
+	if (abs(target) < abs(this->nullHole))
 	{
 		/***************************************************************
 		Tres casos:
@@ -157,15 +171,17 @@ void Azimutal::moveToStep(int target)
 		if (this->nullVerification) lookForZero();
 		else
 		{
-			if (Stepper::getCurrentStep() > -this->nullHole && Stepper::getCurrentStep() < this->nullHole)
+			if (abs(getCurrentStep()) < abs(this->nullHole))
 				return; //aqui ja estamos no zero, e queremos continuar
-			else
-				Stepper::step(-1 * (Stepper::getCurrentStep()));
+			else {
+				Stepper::step(-1 * (getCurrentStep()) );
+			}
+
 		}
 	}
-	else
-		Stepper::step(delta);
+	else	Stepper::step(delta);
 	
+	putStep(delta);
 	return;
 }
 
@@ -201,12 +217,13 @@ bool Azimutal::routine(void)
 {//retorna falso se ocorrer problema.
 	int priority = idPriority();
 	int add = 0;
+	int movement = 0;
 
 	bool operation = true; //verifica se algo ocorreu mesmo
 	switch (priority)
 	{
 	case 4:					//procurar pelo zero
-		if(this->nullVerification)	lookForZero();	
+		if(this->nullVerification)	lookForZero();
 		//soh funciona se estiver ativa
 		break;
 
@@ -222,8 +239,9 @@ bool Azimutal::routine(void)
 		break;
 
 	case 1:					//normal
-		moveToStep(readStep() + add);
-		//ressaltando que neste caso o sensor do zero para de funcionar por causa de add que eh maior que nullHole
+		movement = readStep();
+		moveToStep(movement);
+		
 		break;
 
 	default:
