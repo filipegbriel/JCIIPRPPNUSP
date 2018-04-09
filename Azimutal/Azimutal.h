@@ -68,7 +68,7 @@ public:
 	int		pinRX3;//pinos do Receptor
 	int		pinNS; //fim de curso
 
-	const bool nullVerification = false;  	//determina se deve usar o sensor do zero ou nao
+	const bool nullVerification = true;  	//determina se deve usar o sensor do zero ou nao
 
 	//constantes de calibração
 	float	minPWM, maxPWM;				//min e max leitura analogica do pwm.

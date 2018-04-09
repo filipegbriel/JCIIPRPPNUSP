@@ -33,7 +33,7 @@ Azimutal::Azimutal(int pinRX0, int pinRX1, int pinRX2, int pinRX3, int pinSM0, i
 	this->pinRX3 = pinRX3;
 	pinMode(this->pinRX3, INPUT);
 	this->pinNS = pinNS;
-	pinMode(this->pinNS, INPUT_PULLUP);
+	pinMode(this->pinNS,  INPUT);
 
 	this->lastStep = 0;
 	this->Stepsum = 0;
@@ -49,7 +49,7 @@ Azimutal::Azimutal(int pinRX0, int pinRX1, int pinRX2, int pinRX3, int pinSM0, i
 	this->pinRX3 = pinRX3;
 	pinMode(this->pinRX3, INPUT);
 	this->pinNS = pinNS;
-	pinMode(this->pinNS, INPUT_PULLUP);
+	pinMode(this->pinNS,  INPUT);
 
 	this->lastStep = 0;
 	this->Stepsum = 0;
@@ -65,7 +65,7 @@ Azimutal::Azimutal(int pinRX0, int pinRX1, int pinRX2, int pinRX3, int pinSM0, i
 	this->pinRX3 = pinRX3;
 	pinMode(this->pinRX3, INPUT);
 	this->pinNS = pinNS;
-	pinMode(this->pinNS, INPUT_PULLUP);
+	pinMode(this->pinNS,  INPUT);
 
 	this->lastStep = 0;
 	this->Stepsum = 0;
@@ -199,6 +199,10 @@ void Azimutal::lookForZero(void)
 
 	while (true)
 	{
+		Serial.print("Sensor zero = ");
+		Serial.print(digitalRead(pinNS));
+		Serial.print("\n");
+
 		if (digitalRead(pinNS) == LOW)	break; //esta no zero, ta check
 		else //para encontrar o melhor caminho pro zero
 		{
@@ -218,6 +222,10 @@ bool Azimutal::routine(void)
 	int priority = idPriority();
 	int add = 0;
 	int movement = 0;
+
+	Serial.print("Prioridade = ");
+	Serial.print(idPriority);
+	Serial.print("\n");
 
 	bool operation = true; //verifica se algo ocorreu mesmo
 	switch (priority)
