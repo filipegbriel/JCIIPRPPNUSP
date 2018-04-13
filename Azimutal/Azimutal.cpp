@@ -38,6 +38,7 @@ Azimutal::Azimutal(int pinRX0, int pinRX1, int pinRX2, int pinRX3, int pinSM0, i
 	this->lastStep = 0;
 	this->Stepsum = 0;
 }
+
 Azimutal::Azimutal(int pinRX0, int pinRX1, int pinRX2, int pinRX3, int pinSM0, int pinSM1, int pinSM2, int pinSM3, int nbrSteps, int pinNS) : Stepper(nbrSteps, pinSM0, pinSM1, pinSM2, pinSM3)
 {
 	this->pinRX0 = pinRX0;
@@ -125,7 +126,7 @@ bool Azimutal::filter(int x)
 	
 	//Discretização do intervalo
 	bool answer = true;
-	if (x <= this->lastStep + this->un && x >= this->lastStep - this->un) answer = false;
+	if (x <= this->lastStep + un && x >= this->lastStep - un) answer = false;
 	else															  this->lastStep = x;
 	
 	return answer;
@@ -158,7 +159,7 @@ void Azimutal::moveToStep(int target)
 	
 	//caso queiramos ir ao zero
 	int delta = (target - getCurrentStep());
-	Serial.print(getCurrentStep());
+	//Serial.print(getCurrentStep());
 	
 	if (abs(target) < abs(this->nullHole))
 	{
@@ -182,6 +183,14 @@ void Azimutal::moveToStep(int target)
 	else	Stepper::step(delta);
 	
 	putStep(delta);
+
+	//ATUALIZA VETOR HISTÓRICO DE DELTAS
+	for (int i = 0; i < history - 1; i++)
+	{
+		deltaHistory[i] = deltaHistory[i + 1];
+	}
+	deltaHistory[history] = delta;
+
 	return;
 }
 
@@ -206,14 +215,44 @@ void Azimutal::lookForZero(void)
 		if (digitalRead(pinNS) == LOW)	break; //esta no zero, ta check
 		else //para encontrar o melhor caminho pro zero
 		{
-			if(this->step_number <  this->getNbrSteps() * this->driverConf) //se tiver antes da metade
-				Stepper::step(1 * rotation);
-			else
-				Stepper::step(-1 * rotation);
+			while (digitalRead(pinNS) == HIGH)
+				//if (readPWM(pinRX0) > 80 || readPWM(pinRX0) < 20)
+				//	break; //aborta busca
+				Stepper::step(inteligentSearch() * nullStep);
+		}
+
+		for (int i = 0; i < history; i++)
+		{
+			deltaHistory[i] = 0;
 		}
 	}
 	return;
 	
+}
+
+int Azimutal::inteligentSearch(void)
+{
+	/*
+	CASE
+	+1 se a maioria dos deltas for positivo
+	-1 se a maioria dos deltas for negativo
+	0 se for igual	
+	*/
+
+	int answer = 0;
+	for (int i = 0; i < history; i++)
+	{
+		if (deltaHistory[i] > 0)
+			answer += 1;
+		else
+			answer -= 1;
+	}
+
+	if (answer > 1) answer = 1;
+	else if (answer < -1) answer = -1;
+	else if (answer == 0) answer = 0;
+
+	return answer;
 }
 
 //Métodos públicos
@@ -221,10 +260,10 @@ bool Azimutal::routine(void)
 {//retorna falso se ocorrer problema.
 	int priority = idPriority();
 	int add = 0;
-	int movement = 0;
+	int movement;
 
 	Serial.print("Prioridade = ");
-	Serial.print(idPriority);
+	Serial.print(priority);
 	Serial.print("\n");
 
 	bool operation = true; //verifica se algo ocorreu mesmo
@@ -249,7 +288,8 @@ bool Azimutal::routine(void)
 	case 1:					//normal
 		movement = readStep();
 		moveToStep(movement);
-		
+		Serial.print("Passo : ");
+		Serial.print(movement);
 		break;
 
 	default:

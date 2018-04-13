@@ -34,8 +34,9 @@
 #include	"Stepper.h"
 #include	"Arduino.h"
 
-#define		rotation			1		//sentido de rotacao do usado pelo sensor do zero, deve ser 1 ou menos 1
-
+#define		nullStep			40		//sentido de rotacao do usado pelo sensor do zero, deve ser 1 ou menos 1
+#define		history				5		//tamanho da busca por sentido de retorno do zero.
+#define		un					40		//precisão do filtro, NAO PODE SER PORCENTAGEM DE X (é a discreitzação dos passos)
 class Azimutal : public Stepper
 {
 public:
@@ -85,17 +86,18 @@ public:
 	void	moveToStep(int target);
 	int		idPriority(void);
 	void    putStep(int target);
-		
-	//int		idPriority(void);
 
+	int		inteligentSearch(void);
 	void	lookForZero(void);
 		
 	float	nullHole;
 
+	int		deltaHistory[history];
+
 	bool	filter(int x);
 	int		lastStep;    //usada no filtro
 	int		Stepsum;	 //conta o passo atual
-	const float un = 20; //precisão do filtro, NAO PODE SER PORCENTAGEM DE X
+	 
 	
 };
 #endif
