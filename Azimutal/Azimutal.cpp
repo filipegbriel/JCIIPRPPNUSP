@@ -191,6 +191,7 @@ void Azimutal::moveToStep(int target)
 	}
 	deltaHistory[history] = delta;
 
+	lastStep = target;
 	return;
 }
 
@@ -225,6 +226,7 @@ void Azimutal::lookForZero(void)
 		{
 			deltaHistory[i] = 0;
 		}
+
 	}
 	return;
 	
