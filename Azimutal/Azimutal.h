@@ -18,7 +18,13 @@
 * pinRX1 == alavanca de add90
 * pinRX2 == alavanca de add180
 * pinRX3 == alavanca de PANICO (busca zero)
-* pinNS  == sensor de fim de curso ligado com PULLUP
+* pinNS1 == sensor de fim de curso 1 ligado com PULLUP
+* pinNS2 == sensor de fim de curso 2 ligado com PULLUP
+* pinSM0 == pino motor de passo
+* pinSM1 == pino motor de passo 
+* pinSM2 == pino motor de passo
+* pinSM3 == pino motor de passo
+* nbrSteps == numero de passos do motor
 *
 * ****************************************************************************
 * IMPORTANTE PARA UM K7: PARA A BIBLIOTECA FUNCIONAR, TEM QUE ESTAR JUNTO COM
@@ -35,8 +41,9 @@
 #include	"Arduino.h"
 
 #define		nullStep			40		//sentido de rotacao do usado pelo sensor do zero, deve ser 1 ou menos 1
-#define		history				5		//tamanho da busca por sentido de retorno do zero.
 #define		un					40		//precisão do filtro, NAO PODE SER PORCENTAGEM DE X (é a discreitzação dos passos)
+#define     COMUNICACAO			true
+
 class Azimutal : public Stepper
 {
 public:
@@ -44,7 +51,7 @@ public:
 	Azimutal(int pinRX0, int pinRX1, int pinRX2, int pinRX3,
 		int pinSM0, int pinSM1, int nbrSteps, int pinNS);
 	Azimutal(int pinRX0, int pinRX1, int pinRX2, int pinRX3,
-				int pinSM0, int pinSM1, int pinSM2, int pinSM3, int nbrSteps, int pinNS);
+				int pinSM0, int pinSM1, int pinSM2, int pinSM3, int nbrSteps, int pinNS1, int pinNS2);
 	Azimutal(int pinRX0, int pinRX1, int pinRX2, int pinRX3,
 				int pinSM0, int pinSM1, int pinSM2, int pinSM3, int pinSM4, int nbrSteps, int pinNS);
 		
@@ -67,7 +74,8 @@ public:
 	int		pinRX1;
 	int		pinRX2;
 	int		pinRX3;//pinos do Receptor
-	int		pinNS; //fim de curso
+	int		pinNS1; //fim de curso 1
+	int		pinNS2; //fim de curso 2
 
 	const bool nullVerification = true;  	//determina se deve usar o sensor do zero ou nao
 
@@ -89,10 +97,9 @@ public:
 
 	int		inteligentSearch(void);
 	void	lookForZero(void);
+	bool	AmIatZero(int zeroType);
 		
 	float	nullHole;
-
-	int		deltaHistory[history];
 
 	bool	filter(int x);
 	int		lastStep;    //usada no filtro

@@ -19,10 +19,20 @@
  * pinRX1 == alavanca de add90
  * pinRX2 == alavanca de add180
  * pinRX3 == alavanca de PANICO (busca zero)
+ * pinNS1 == sensor de fim de curso 1 ligado com PULLUP
+ * pinNS2 == sensor de fim de curso 2 ligado com PULLUP
+ * pinSM0 == pino motor de passo
+ * pinSM1 == pino motor de passo
+ * pinSM2 == pino motor de passo
+ * pinSM3 == pino motor de passo
+ * nbrSteps == numero de passos do motor
+ *
  */
 
+#define	FRONTAL 1
+#define	TRASEIRO 2
 
-Azimutal::Azimutal(int pinRX0, int pinRX1, int pinRX2, int pinRX3, int pinSM0, int pinSM1, int nbrSteps, int pinNS) : Stepper(nbrSteps, pinSM0, pinSM1)
+Azimutal::Azimutal(int pinRX0, int pinRX1, int pinRX2, int pinRX3, int pinSM0, int pinSM1, int nbrSteps, int pinNS1, int pin NS2) : Stepper(nbrSteps, pinSM0, pinSM1)
 {
 	this->pinRX0 = pinRX0;
 	pinMode(this->pinRX0, INPUT);
@@ -32,14 +42,16 @@ Azimutal::Azimutal(int pinRX0, int pinRX1, int pinRX2, int pinRX3, int pinSM0, i
 	pinMode(this->pinRX2, INPUT);
 	this->pinRX3 = pinRX3;
 	pinMode(this->pinRX3, INPUT);
-	this->pinNS = pinNS;
-	pinMode(this->pinNS,  INPUT);
+	this->pinNS1 = pinNS1;
+	pinMode(this->pinNS1,  INPUT);
+	this->pinNS2 = pinNS2;
+	pinMode(this->pinNS2, INPUT);
 
 	this->lastStep = 0;
 	this->Stepsum = 0;
 }
 
-Azimutal::Azimutal(int pinRX0, int pinRX1, int pinRX2, int pinRX3, int pinSM0, int pinSM1, int pinSM2, int pinSM3, int nbrSteps, int pinNS) : Stepper(nbrSteps, pinSM0, pinSM1, pinSM2, pinSM3)
+Azimutal::Azimutal(int pinRX0, int pinRX1, int pinRX2, int pinRX3, int pinSM0, int pinSM1, int pinSM2, int pinSM3, int nbrSteps, int pinNS1, int pin NS2) : Stepper(nbrSteps, pinSM0, pinSM1, pinSM2, pinSM3)
 {
 	this->pinRX0 = pinRX0;
 	pinMode(this->pinRX0, INPUT);
@@ -49,13 +61,15 @@ Azimutal::Azimutal(int pinRX0, int pinRX1, int pinRX2, int pinRX3, int pinSM0, i
 	pinMode(this->pinRX2, INPUT);
 	this->pinRX3 = pinRX3;
 	pinMode(this->pinRX3, INPUT);
-	this->pinNS = pinNS;
-	pinMode(this->pinNS,  INPUT);
+	this->pinNS1 = pinNS1;
+	pinMode(this->pinNS1, INPUT);
+	this->pinNS2 = pinNS2;
+	pinMode(this->pinNS2, INPUT);
 
 	this->lastStep = 0;
 	this->Stepsum = 0;
 }
-Azimutal::Azimutal(int pinRX0, int pinRX1, int pinRX2, int pinRX3, int pinSM0, int pinSM1, int pinSM2, int pinSM3, int pinSM4, int nbrSteps, int pinNS) : Stepper(nbrSteps, pinSM0, pinSM1, pinSM2, pinSM3, pinSM4)
+Azimutal::Azimutal(int pinRX0, int pinRX1, int pinRX2, int pinRX3, int pinSM0, int pinSM1, int pinSM2, int pinSM3, int pinSM4, int nbrSteps, int pinNS1, int pin NS2) : Stepper(nbrSteps, pinSM0, pinSM1, pinSM2, pinSM3, pinSM4)
 {
 	this->pinRX0 = pinRX0;
 	pinMode(this->pinRX0, INPUT);
@@ -65,8 +79,10 @@ Azimutal::Azimutal(int pinRX0, int pinRX1, int pinRX2, int pinRX3, int pinSM0, i
 	pinMode(this->pinRX2, INPUT);
 	this->pinRX3 = pinRX3;
 	pinMode(this->pinRX3, INPUT);
-	this->pinNS = pinNS;
-	pinMode(this->pinNS,  INPUT);
+	this->pinNS1 = pinNS1;
+	pinMode(this->pinNS1, INPUT);
+	this->pinNS2 = pinNS2;
+	pinMode(this->pinNS2, INPUT);
 
 	this->lastStep = 0;
 	this->Stepsum = 0;
@@ -183,15 +199,8 @@ void Azimutal::moveToStep(int target)
 	else	Stepper::step(delta);
 	
 	putStep(delta);
-
-	//ATUALIZA VETOR HISTÓRICO DE DELTAS
-	for (int i = 0; i < history - 1; i++)
-	{
-		deltaHistory[i] = deltaHistory[i + 1];
-	}
-	deltaHistory[history] = delta;
-
 	lastStep = target;
+	
 	return;
 }
 
@@ -203,58 +212,98 @@ int Azimutal::idPriority(void)
 	else								 return 1;	//alavanca principal
 }
 
-void Azimutal::lookForZero(void)
+bool Azimutal::AmIatZero(int zeroType)
+{	// a partir do zeroType, retona se esta no zeo
+	//1 - zero frontal
+	//2 - zero traseiro
+
+	switch (zeroType)
+	{
+	case 1 : 
+		if (digitalRead(pinNS1)) == LOW && digitalRead(pinNS2) == HIGH)
+			return true;
+		else
+			return false;
+	case 2:
+		if (digitalRead(pinNS1)) == HIGH && digitalRead(pinNS2) == LOW)
+			return true;
+		else
+			return false;
+	default: 
+			return false;
+			break;
+	}
+	
+	return false;
+}
+void Azimutal::lookForZero(int zeroType)
 {
 	if (!nullVerification) return;
 
 	while (true)
 	{
-		Serial.print("Sensor zero = ");
-		Serial.print(digitalRead(pinNS));
-		Serial.print("\n");
+				if (COMUNICACAO)
+				{
+					Serial.print("Buscando zero : ");
+					Serial.print(zeroType);
+					Serial.print("\n");
+					Serial.print("Esta neste zero : ");
+					Serial.print(AmIatZero(zeroType));
+					Serial.print("\n");
+				}
 
-		if (digitalRead(pinNS) == LOW)	break; //esta no zero, ta check
+		if (AmIatZero(zeroType))	break; //esta no zero, ta check
 		else //para encontrar o melhor caminho pro zero
 		{
-			while (digitalRead(pinNS) == HIGH)
+			while (!AmIatZero(zeroType))
+			{
 				//if (readPWM(pinRX0) > 80 || readPWM(pinRX0) < 20)
 				//	break; //aborta busca
-				Stepper::step(inteligentSearch() * nullStep);
-		}
-
-		for (int i = 0; i < history; i++)
-		{
-			deltaHistory[i] = 0;
+				
+				Stepper::step(inteligentSearch(zeroType) * nullStep);
+				
+				if (COMUNICACAO)
+				{
+					Serial.print("Buscando zero : ");
+					Serial.print(zeroType);
+					Serial.print("\n");
+					Serial.print("Esta neste zero : ");
+					Serial.print(AmIatZero(zeroType));
+					Serial.print("\n");
+				}
+			}
 		}
 
 	}
 	return;
-	
 }
-
-int Azimutal::inteligentSearch(void)
-{
-	/*
-	CASE
-	+1 se a maioria dos deltas for positivo
-	-1 se a maioria dos deltas for negativo
-	0 se for igual	
-	*/
-
-	int answer = 0;
-	for (int i = 0; i < history; i++)
+int Azimutal::inteligentSearch(int zeroType)
+{	// a partir do zeroType, retona a melhor direção de busca
+	//1 - zero frontal
+	//2 - zero traseiro
+	//retorna -1 ou 0 ou 1
+	
+	switch (zeroType)
 	{
-		if (deltaHistory[i] > 0)
-			answer += 1;
-		else
-			answer -= 1;
+	case 1:
+		if (digitalRead(pinNS1)) == LOW && digitalRead(pinNS2) == HIGH)
+			return 0;
+		else if (digitalRead(pinNS1)) == LOW && digitalRead(pinNS2) == LOW)
+				return -1;
+		else return 1;
+	
+	case 2:
+		if (digitalRead(pinNS1)) == HIGH && digitalRead(pinNS2) == LOW)
+			return 0;
+		else if (digitalRead(pinNS1)) == LOW && digitalRead(pinNS2) == LOW)
+				return 1;
+		else return -1;
+	
+	default:
+		return 0;
+		break;
 	}
-
-	if (answer > 1) answer = 1;
-	else if (answer < -1) answer = -1;
-	else if (answer == 0) answer = 0;
-
-	return answer;
+	return 0;
 }
 
 //Métodos públicos
@@ -271,9 +320,9 @@ bool Azimutal::routine(void)
 	bool operation = true; //verifica se algo ocorreu mesmo
 	switch (priority)
 	{
-	case 4:					//procurar pelo zero
-		if(this->nullVerification)	lookForZero();
-		//soh funciona se estiver ativa
+	case 4:					//procurar pelo zero 
+		if(this->nullVerification)	lookForZero(TRASEIRO);
+		
 		break;
 
 	case 3:					//adicione 180
