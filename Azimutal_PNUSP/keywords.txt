@@ -1,0 +1,28 @@
+#######################################
+# Syntax Coloring Map For Test
+#######################################
+
+#######################################
+#
+ Datatypes (KEYWORD1)
+#######################################
+
+Azimutal	KEYWORD1	Azimutal#######################################
+#
+ Methods and Functions (KEYWORD2)
+#######################################routine	KEYWORD2
+	KEYWORD2setConstPWM	KEYWORD2setConstNH	
+KEYWORD2setRestrition	KEYWORD2setDriverConf	KEYWORD2setCalibrationsVars	KEYWORD2
+
+######################################
+#
+ Instances (KEYWORD2)
+#######################################
+direction	KEYWORD2
+speed	KEYWORD2
+
+
+#######################################
+#
+ Constants (LITERAL1)
+#######################################

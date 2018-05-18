@@ -40,20 +40,22 @@
 #include	"Stepper.h"
 #include	"Arduino.h"
 
-#define		nullStep			40		//sentido de rotacao do usado pelo sensor do zero, deve ser 1 ou menos 1
-#define		un					40		//precisão do filtro, NAO PODE SER PORCENTAGEM DE X (é a discreitzação dos passos)
+#define		nullStep			150		//sentido de rotacao do usado pelo sensor do zero, deve ser 1 ou menos 1
+#define		un					100		//precisão do filtro, NAO PODE SER PORCENTAGEM DE X (é a discreitzação dos passos)
 #define     COMUNICACAO			true
+#define     TEMPO_DE_DELAY		10
+#define     PASSOS_EXTRA_ZERO   1000
 
 class Azimutal : public Stepper
 {
 public:
 	//construtures para todos os casos de motor de passo
 	Azimutal(int pinRX0, int pinRX1, int pinRX2, int pinRX3,
-		int pinSM0, int pinSM1, int nbrSteps, int pinNS);
+		int pinSM0, int pinSM1, int nbrSteps, int pinNS1, int pinNS2);
 	Azimutal(int pinRX0, int pinRX1, int pinRX2, int pinRX3,
 				int pinSM0, int pinSM1, int pinSM2, int pinSM3, int nbrSteps, int pinNS1, int pinNS2);
 	Azimutal(int pinRX0, int pinRX1, int pinRX2, int pinRX3,
-				int pinSM0, int pinSM1, int pinSM2, int pinSM3, int pinSM4, int nbrSteps, int pinNS);
+				int pinSM0, int pinSM1, int pinSM2, int pinSM3, int pinSM4, int nbrSteps, int pinNS1, int pinNS2);
 		
 	
 	//Constantes de calibração
@@ -95,8 +97,8 @@ public:
 	int		idPriority(void);
 	void    putStep(int target);
 
-	int		inteligentSearch(void);
-	void	lookForZero(void);
+	int		inteligentSearch(int ZeroType);
+	void	lookForZero(int ZeroType);
 	bool	AmIatZero(int zeroType);
 		
 	float	nullHole;
@@ -104,7 +106,8 @@ public:
 	bool	filter(int x);
 	int		lastStep;    //usada no filtro
 	int		Stepsum;	 //conta o passo atual
-	 
+	int     effectiveZero;
+	
 	
 };
 #endif

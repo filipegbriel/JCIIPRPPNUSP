@@ -32,7 +32,7 @@
 #define	FRONTAL 1
 #define	TRASEIRO 2
 
-Azimutal::Azimutal(int pinRX0, int pinRX1, int pinRX2, int pinRX3, int pinSM0, int pinSM1, int nbrSteps, int pinNS1, int pin NS2) : Stepper(nbrSteps, pinSM0, pinSM1)
+Azimutal::Azimutal(int pinRX0, int pinRX1, int pinRX2, int pinRX3, int pinSM0, int pinSM1, int nbrSteps, int pinNS1, int pinNS2) : Stepper(nbrSteps, pinSM0, pinSM1)
 {
 	this->pinRX0 = pinRX0;
 	pinMode(this->pinRX0, INPUT);
@@ -51,7 +51,7 @@ Azimutal::Azimutal(int pinRX0, int pinRX1, int pinRX2, int pinRX3, int pinSM0, i
 	this->Stepsum = 0;
 }
 
-Azimutal::Azimutal(int pinRX0, int pinRX1, int pinRX2, int pinRX3, int pinSM0, int pinSM1, int pinSM2, int pinSM3, int nbrSteps, int pinNS1, int pin NS2) : Stepper(nbrSteps, pinSM0, pinSM1, pinSM2, pinSM3)
+Azimutal::Azimutal(int pinRX0, int pinRX1, int pinRX2, int pinRX3, int pinSM0, int pinSM1, int pinSM2, int pinSM3, int nbrSteps, int pinNS1, int pinNS2) : Stepper(nbrSteps, pinSM0, pinSM1, pinSM2, pinSM3)
 {
 	this->pinRX0 = pinRX0;
 	pinMode(this->pinRX0, INPUT);
@@ -69,7 +69,7 @@ Azimutal::Azimutal(int pinRX0, int pinRX1, int pinRX2, int pinRX3, int pinSM0, i
 	this->lastStep = 0;
 	this->Stepsum = 0;
 }
-Azimutal::Azimutal(int pinRX0, int pinRX1, int pinRX2, int pinRX3, int pinSM0, int pinSM1, int pinSM2, int pinSM3, int pinSM4, int nbrSteps, int pinNS1, int pin NS2) : Stepper(nbrSteps, pinSM0, pinSM1, pinSM2, pinSM3, pinSM4)
+Azimutal::Azimutal(int pinRX0, int pinRX1, int pinRX2, int pinRX3, int pinSM0, int pinSM1, int pinSM2, int pinSM3, int pinSM4, int nbrSteps, int pinNS1, int pinNS2) : Stepper(nbrSteps, pinSM0, pinSM1, pinSM2, pinSM3, pinSM4)
 {
 	this->pinRX0 = pinRX0;
 	pinMode(this->pinRX0, INPUT);
@@ -185,7 +185,7 @@ void Azimutal::moveToStep(int target)
 		(2) Se eu estou no zero e quero me manter no zero sem o sensor
 		(3) Se eu nao estou no zero e quero ir ao zero sem o sensor
 		*****************************************************************/
-		if (this->nullVerification) lookForZero();
+		if (this->nullVerification) lookForZero(effectiveZero);
 		else
 		{
 			if (abs(getCurrentStep()) < abs(this->nullHole))
@@ -219,13 +219,13 @@ bool Azimutal::AmIatZero(int zeroType)
 
 	switch (zeroType)
 	{
-	case 1 : 
-		if (digitalRead(pinNS1)) == LOW && digitalRead(pinNS2) == HIGH)
+	case 2 : 
+		if (digitalRead(pinNS1) == LOW && digitalRead(pinNS2) == HIGH)
 			return true;
 		else
 			return false;
-	case 2:
-		if (digitalRead(pinNS1)) == HIGH && digitalRead(pinNS2) == LOW)
+	case 1:
+		if (digitalRead(pinNS1) == HIGH && digitalRead(pinNS2) == LOW)
 			return true;
 		else
 			return false;
@@ -239,9 +239,9 @@ bool Azimutal::AmIatZero(int zeroType)
 void Azimutal::lookForZero(int zeroType)
 {
 	if (!nullVerification) return;
-
-	while (true)
-	{
+	int dir = 0;
+	//while (AmIatZero(zeroType))
+	//{
 				if (COMUNICACAO)
 				{
 					Serial.print("Buscando zero : ");
@@ -252,16 +252,18 @@ void Azimutal::lookForZero(int zeroType)
 					Serial.print("\n");
 				}
 
-		if (AmIatZero(zeroType))	break; //esta no zero, ta check
+		if (AmIatZero(zeroType))	return; //esta no zero, ta check
 		else //para encontrar o melhor caminho pro zero
 		{
+			int dir = 0;
 			while (!AmIatZero(zeroType))
 			{
+				bool state = AmIatZero(zeroType);
 				//if (readPWM(pinRX0) > 80 || readPWM(pinRX0) < 20)
 				//	break; //aborta busca
-				
-				Stepper::step(inteligentSearch(zeroType) * nullStep);
-				
+				int dir1 = inteligentSearch(zeroType);
+				Stepper::step(dir1 * nullStep);
+
 				if (COMUNICACAO)
 				{
 					Serial.print("Buscando zero : ");
@@ -271,9 +273,13 @@ void Azimutal::lookForZero(int zeroType)
 					Serial.print(AmIatZero(zeroType));
 					Serial.print("\n");
 				}
-			}
-		}
+				for (int i = 0; i < TEMPO_DE_DELAY; i++)
+					if (state != AmIatZero(zeroType)) break;
 
+				dir = dir1;
+			}
+		//}
+			step(PASSOS_EXTRA_ZERO * dir);
 	}
 	return;
 }
@@ -286,16 +292,16 @@ int Azimutal::inteligentSearch(int zeroType)
 	switch (zeroType)
 	{
 	case 1:
-		if (digitalRead(pinNS1)) == LOW && digitalRead(pinNS2) == HIGH)
+		if (digitalRead(this->pinNS1) == LOW && digitalRead(this->pinNS2) == HIGH)
 			return 0;
-		else if (digitalRead(pinNS1)) == LOW && digitalRead(pinNS2) == LOW)
+		else if (digitalRead(this->pinNS1) == LOW && digitalRead(this->pinNS2) == LOW)
 				return -1;
 		else return 1;
 	
 	case 2:
-		if (digitalRead(pinNS1)) == HIGH && digitalRead(pinNS2) == LOW)
+		if (digitalRead(this->pinNS1) == HIGH && digitalRead(this->pinNS2) == LOW)
 			return 0;
-		else if (digitalRead(pinNS1)) == LOW && digitalRead(pinNS2) == LOW)
+		else if (digitalRead(this->pinNS1) == LOW && digitalRead(this->pinNS2) == LOW)
 				return 1;
 		else return -1;
 	
@@ -326,8 +332,9 @@ bool Azimutal::routine(void)
 		break;
 
 	case 3:					//adicione 180
-		add = ((this->getNbrSteps() * this->driverConf) / 2) + this->calibration1;
-		moveToStep(readStep() + add);
+		effectiveZero = FRONTAL;
+		movement = readStep();
+		moveToStep(movement);
 		break;
 
 	case 2:					//adicione 90
@@ -337,6 +344,7 @@ bool Azimutal::routine(void)
 		break;
 
 	case 1:					//normal
+		effectiveZero = TRASEIRO;
 		movement = readStep();
 		moveToStep(movement);
 		Serial.print("Passo : ");
