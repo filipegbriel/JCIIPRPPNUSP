@@ -1,9 +1,11 @@
 ï»¿#include "Azimutal.h"
 /*
- * Azimutal.h - Biblioteca de um azimutal  - Versï¿½o 1.1
+ * Azimutal.h - Biblioteca de um azimutal  - Versï¿½o 1.2
  *
- * Funcionamento original	(0.0)   por Filipe Gabriel Santos e Henrique Martinez Rocamora.
- * Biblioteca para arduino	(0.1)	por Filipe Santos, Anna Queiroz
+ * Funcionamento original	(0.0)   por Filipe Gabriel Santos Valentim e Henrique Martinez Rocamora.
+ * Biblioteca para arduino	(1.0)	por Filipe Valentim, Anna Queiroz
+ * Funcionamento incial completo (1.1) 	por Filipe Valentim, Anna Queiroz
+ * Atualização para calibrações e busca inteligente do zero (1.2) por Filipe Valentim
  *
  * Esta biblioteca ï¿½ para o uso privado da instituiï¿½ï¿½o hoje (2017) nomeada por PoliNï¿½utico - grupo de
  * extensï¿½o acadï¿½mica da Escola Politecninca da Universidade de Sï¿½o Paulo. Seu uso nï¿½o estï¿½ autorizado 
@@ -119,7 +121,30 @@ bool Azimutal::setCalibrationsVars(int eins, int zwei, int drei)
 
 	return true;
 }
-
+bool Azimutal::setNullVerif(bool set)
+{
+	this->nullVerification = set;
+	
+	return true;
+}
+bool Azimutal::setNullSteps(int number)
+{
+	this->nullStep = number;
+	
+	return true;
+}
+bool Azimutal::setNullPosSteps(int number)
+{
+	this->PASSOS_EXTRA_ZERO = number;
+	
+	return true;
+}
+bool Azimutal::setNullTimeSearch(int time)
+{
+	this->TEMPO_DE_DELAY = time;
+	
+	return true;
+}
 //MÃ©todos privados
 float Azimutal::readPWM(int pin)
 {

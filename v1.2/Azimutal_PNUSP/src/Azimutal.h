@@ -1,8 +1,11 @@
 ﻿/*
-* Azimutal.h - Biblioteca de um azimutal  - Vers�o 1.1
-*
-* Funcionamento original	(0.0)   por Filipe Gabriel Santos e Henrique Martinez Rocamora.
-* Biblioteca para arduino	(0.1)	por Filipe Santos, Anna Queiroz
+ * Azimutal.h - Biblioteca de um azimutal  - Vers�o 1.2
+ *
+ * Funcionamento original	(0.0)   por Filipe Gabriel Santos Valentim e Henrique Martinez Rocamora.
+ * Biblioteca para arduino	(1.0)	por Filipe Valentim, Anna Queiroz
+ * Funcionamento incial completo (1.1) 	por Filipe Valentim, Anna Queiroz
+ * Atualiza��o para calibra��es e busca inteligente do zero (1.2) por Filipe Valentim
+ *
 *
 * Esta biblioteca � para o uso privado da institui��o hoje (2017) nomeada por PoliN�utico - grupo de
 * extens�o acad�mica da Escola Politecninca da Universidade de S�o Paulo. Seu uso n�o est� autorizado
@@ -40,11 +43,9 @@
 #include	"Stepper.h"
 #include	"Arduino.h"
 
-#define		nullStep			150		//sentido de rotacao do usado pelo sensor do zero, deve ser 1 ou menos 1
+
 #define		un					100		//precisão do filtro, NAO PODE SER PORCENTAGEM DE X (é a discreitzação dos passos)
-#define     COMUNICACAO			true
-#define     TEMPO_DE_DELAY		10
-#define     PASSOS_EXTRA_ZERO   1000
+#define     COMUNICACAO			false
 
 class Azimutal : public Stepper
 {
@@ -65,12 +66,16 @@ public:
 	bool	setRestrition(float res);
 	bool	setDriverConf(int num); //configuração do driver
 	bool	setCalibrationsVars(int eins, int zwei, int drei);
+	bool    setNullVerif(bool set);
+	bool    setNullSteps(int number);
+	bool 	setNullPosSteps(int number);
+	bool    setNullTimeSearch(int time); 	//delay entre passos do zero em busca
 
 	//FUNCAO ROTINA: COMO TDO FUNCIONA
 	bool	routine(void);
 	int		getCurrentStep(void);
 
-//private:
+private:
 
 	int		pinRX0;
 	int		pinRX1;
@@ -79,15 +84,19 @@ public:
 	int		pinNS1; //fim de curso 1
 	int		pinNS2; //fim de curso 2
 
-	const bool nullVerification = true;  	//determina se deve usar o sensor do zero ou nao
-
-	//constantes de calibração
+	bool 	nullVerification;  	//determina se deve usar o sensor do zero ou nao
+		
+		//constantes de calibração
 	float	minPWM, maxPWM;				//min e max leitura analogica do pwm.
 	float	restrition;					//no modo normal é a restrição do quanto pode ir ao lado
-	int		driverConf;					//conf de ultiplicacao de passos do driver				
+	int		driverConf;					//conf de multiplicacao de passos do driver				
 	int		calibration1;				//conf de add de 180
 	int		calibration2;				//conf de add de 90 pra esquerda
 	int		calibration3;				//conf de add de 90 pra direita (pode ser que esteja trocado)
+	int 	nullStep;					//passos que da pra acertar o zero na busca inteligente
+	int		PASSOS_EXTRA_ZERO;			//acertar posi��o ap�s busca do zero.
+	int     TEMPO_DE_DELAY;				//delay entre passos do zero em busca
+
 
 	//metodos privados
 	float	map_f(float number, float minI, float maxI, float minF, float maxF);
